@@ -53,7 +53,6 @@ contract AssetFactory {
 
     // Create a mapping from asset IDs to NFT contract addresses
     mapping(uint256 => Asset) public idToAsset;
-    mapping(address => Asset[]) public addressToAssetList;
 
     // Create a counter to keep track of the next asset ID to be assigned
     uint256 public nextAssetId;
@@ -89,7 +88,6 @@ contract AssetFactory {
 
         // Increment the asset ID counter and assign the new ID to the asset
         idToAsset[nextAssetId] = new Asset(nextAssetId, _name, _power, msg.sender, address(this));
-        addressToAssetList[msg.sender].push(idToAsset[nextAssetId]);
         // Emit an event to announce the creation of the new NFT
         emit NewAsset(msg.sender, nextAssetId, _name, _power);
         // Increment the asset ID counter for the next asset to be created
@@ -127,23 +125,24 @@ contract AssetFactory {
         uint bestWeapon = 0;
         uint bestArmor = 0;
         uint bestAcessory = 0;
+        Asset[] memory assetList = getAllMyAssets();
 
-        for (uint i=0; i<addressToAssetList[msg.sender].length; i++)
+        for (uint i=0; i<assetList.length; i++)
         {
-            if(keccak256(bytes(addressToAssetList[msg.sender][i].name())) == keccak256(bytes("Weapon")))
+            if(keccak256(bytes(assetList[i].name())) == keccak256(bytes("Weapon")))
             {
-                if(addressToAssetList[msg.sender][i].power() > bestWeapon)
-                    bestWeapon = addressToAssetList[msg.sender][i].power();
+                if(assetList[i].power() > bestWeapon)
+                    bestWeapon = assetList[i].power();
             }
-            else if(keccak256(bytes(addressToAssetList[msg.sender][i].name())) == keccak256(bytes("Armor")))
+            else if(keccak256(bytes(assetList[i].name())) == keccak256(bytes("Armor")))
             {
-                if(addressToAssetList[msg.sender][i].power() > bestArmor)
-                    bestArmor = addressToAssetList[msg.sender][i].power();
+                if(assetList[i].power() > bestArmor)
+                    bestArmor = assetList[i].power();
             }
             else
             {
-                if(addressToAssetList[msg.sender][i].power() > bestAcessory)
-                    bestAcessory = addressToAssetList[msg.sender][i].power();
+                if(assetList[i].power() > bestAcessory)
+                    bestAcessory = assetList[i].power();
             }
         }
 
@@ -164,16 +163,41 @@ contract AssetFactory {
         return assetsOnMarket;
     }
 
+    function removeAssetFromMarket(uint assetId) public onlyAssetOwner(assetId)
+    {
+        for (uint i = 0; i < assetsOnMarket.length-1; i++){
+            if(assetsOnMarket[i].assetId() == assetId)
+            {
+                Asset aux = assetsOnMarket[i];
+                assetsOnMarket[i] = assetsOnMarket[assetsOnMarket.length-1];
+                assetsOnMarket[assetsOnMarket.length-1] = aux;
+                break;
+            }
+        }
+        assetsOnMarket[assetsOnMarket.length-1].removeFromSale();
+        assetsOnMarket.pop();
+    }
+
+    function countAllMyAssets() public view returns(uint)
+    {
+        uint total = 0;
+        for (uint i = 0; i < nextAssetId; i++)
+        {
+            if (idToAsset[i].owner() == msg.sender)
+                total++;
+        }
+        return total;
+    }
+
     function getAllMyAssets() public view returns(Asset[] memory) {
-        return addressToAssetList[msg.sender];
-    }
-
-    function getAssetsCount(address owner) public view returns(uint count) {
-        return addressToAssetList[owner].length;
-    }
-
-    function getAssetAtRow(address owner, uint row) public view returns(Asset theAsset) {
-        return addressToAssetList[owner][row];
+        Asset[] memory myAssets = new Asset[](countAllMyAssets());
+        uint j = 0;
+        for (uint i = 0; i < nextAssetId; i++)
+        {
+            if (idToAsset[i].owner() == msg.sender)
+                myAssets[j++] = idToAsset[i];
+        }
+        return myAssets;
     }
 
     function transferAssetOwnership(uint256 assetId, address newOwner) private {
@@ -181,38 +205,10 @@ contract AssetFactory {
     }
 
     function buyAsset(uint assetId) public payable existAssetOnMarket checkAssetValue(assetId){
-        address prevOwner = idToAsset[assetId].owner();
         (bool success, ) = payable(idToAsset[assetId].owner()).call{value: msg.value}("");
         require(success, "Failed to buy asset");
         idToAsset[assetId].transferAssetOwnership(msg.sender);
-
-        addressToAssetList[msg.sender].push(idToAsset[assetId]);
-
-        uint prevAssetId = 0;
-        for (uint i = 0; i < addressToAssetList[prevOwner].length-1; i++){
-            if(addressToAssetList[prevOwner][i] == idToAsset[assetId])
-            {
-                prevAssetId = i;
-                break;
-            }
-        }
-        for (uint i = prevAssetId; i < addressToAssetList[prevOwner].length-1; i++){
-            addressToAssetList[prevOwner][i] = addressToAssetList[prevOwner][i+1];
-        }
-        addressToAssetList[prevOwner].pop();
-
-        uint marketAssetId = 0;
-        for (uint i = 0; i < assetsOnMarket.length-1; i++){
-            if(assetsOnMarket[i] == idToAsset[assetId])
-            {
-                marketAssetId = i;
-                break;
-            }
-        }
-        for (uint i = marketAssetId; i < assetsOnMarket.length-1; i++){
-            assetsOnMarket[i] = assetsOnMarket[i+1];
-        }
-        assetsOnMarket.pop();
+        removeAssetFromMarket(assetId);
     }
 }
 
@@ -254,7 +250,6 @@ contract Asset {
     }
 
     function transferAssetOwnership(address newOwner) public onlyFactory {
-        forSale = false;
         value = 0;
         owner = newOwner;
     }
@@ -262,5 +257,10 @@ contract Asset {
     function putAssetToSale(uint _value) public onlyFactory notForSale {
         forSale = true;
         value = _value;
+    }
+
+    function removeFromSale() public onlyFactory
+    {
+        forSale = false;
     }
 }

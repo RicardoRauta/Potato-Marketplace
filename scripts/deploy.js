@@ -11,7 +11,7 @@ async function main() {
   //await marketplace.deployed();
 
   const data = {
-    address: 0xaE627D6ECAD50E590C7eF675F6B1741d3673e2c9,
+    address: 0x63d53E76bbee60a19D535d6276E20d867C768DCA,
     abi:[
       {
         "anonymous": false,
@@ -105,25 +105,14 @@ async function main() {
       {
         "inputs": [
           {
-            "internalType": "address",
-            "name": "",
-            "type": "address"
-          },
-          {
             "internalType": "uint256",
-            "name": "",
+            "name": "assetId",
             "type": "uint256"
           }
         ],
-        "name": "addressToAssetList",
-        "outputs": [
-          {
-            "internalType": "contract Asset",
-            "name": "",
-            "type": "address"
-          }
-        ],
-        "stateMutability": "view",
+        "name": "removeAssetFromMarket",
+        "outputs": [],
+        "stateMutability": "nonpayable",
         "type": "function"
       },
       {
@@ -173,6 +162,19 @@ async function main() {
       },
       {
         "inputs": [],
+        "name": "countAllMyAssets",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
         "name": "getAllAssetsOnMarket",
         "outputs": [
           {
@@ -192,49 +194,6 @@ async function main() {
             "internalType": "contract Asset[]",
             "name": "",
             "type": "address[]"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          },
-          {
-            "internalType": "uint256",
-            "name": "row",
-            "type": "uint256"
-          }
-        ],
-        "name": "getAssetAtRow",
-        "outputs": [
-          {
-            "internalType": "contract Asset",
-            "name": "theAsset",
-            "type": "address"
-          }
-        ],
-        "stateMutability": "view",
-        "type": "function"
-      },
-      {
-        "inputs": [
-          {
-            "internalType": "address",
-            "name": "owner",
-            "type": "address"
-          }
-        ],
-        "name": "getAssetsCount",
-        "outputs": [
-          {
-            "internalType": "uint256",
-            "name": "count",
-            "type": "uint256"
           }
         ],
         "stateMutability": "view",

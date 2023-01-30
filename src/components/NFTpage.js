@@ -14,6 +14,7 @@ const [data, updateData] = useState({});
 const [dataFetched, updateDataFetched] = useState(false);
 const [message, updateMessage] = useState("");
 const [currAddress, updateCurrAddress] = useState("0x");
+const [onMarket, updateMarketState] = useState(false);
 
 function changeColor(id, power)
 {
@@ -42,6 +43,7 @@ async function getNFTData(tokenId) {
         let image = swordImg;
         if (name == "Accessory") image = acessoryImg;
         else if (name == "Armor") image = armorImg;
+    let marketState = await assetContract.forSale();
 
     let value = ethers.utils.formatUnits((await assetContract.value()).toString(), 'ether');
     let item = {
@@ -58,6 +60,7 @@ async function getNFTData(tokenId) {
     updateDataFetched(true);
     console.log("address", addr)
     updateCurrAddress(addr);
+    updateMarketState(marketState);
 }
 
 async function buyNFT(tokenId) {
@@ -70,9 +73,9 @@ async function buyNFT(tokenId) {
         //Pull the deployed contract instance
         let contract = new ethers.Contract(MarketplaceJSON.address, MarketplaceJSON.abi, signer);
         const salePrice = ethers.utils.parseUnits(data.value, 'ether')
-        updateMessage("Buying the Asset... Please Wait (Upto 5 mins)")
+        updateMessage("Buying the Asset... Please Wait (Up to 2 mins)")
         //run the executeSale function
-        let transaction = await contract.buyAsset(tokenId, {value:salePrice});
+        let transaction = await contract.buyAsset(tokenId, {value:salePrice, gasLimit: 700000});
         await transaction.wait();
 
         alert('You successfully bought the Asset!');
@@ -107,6 +110,30 @@ async function sellNFT(tokenId) {
     }
 }
 
+async function removeFromMarket(tokenId) {
+    try {
+        const ethers = require("ethers");
+        //After adding your Hardhat network to your metamask, this code will get providers and signers
+        const provider = new ethers.providers.Web3Provider(window.ethereum);
+        const signer = provider.getSigner();
+
+        //Pull the deployed contract instance
+        let contract = new ethers.Contract(MarketplaceJSON.address, MarketplaceJSON.abi, signer);
+        
+        
+        //run the executeSale function
+        let transaction = await contract.removeAssetFromMarket(tokenId);
+        updateMessage("Removing the Asset from Market...")
+        await transaction.wait();
+
+        alert('You successfully remove the Asset on Market!');
+        updateMessage("");
+    }
+    catch(e) {
+        alert("Upload Error"+e)
+    }
+}
+
     const params = useParams();
     const tokenId = params.tokenId;
     if(!dataFetched)
@@ -134,6 +161,7 @@ async function sellNFT(tokenId) {
                     <div>
                     { currAddress != data.owner ?
                         <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={() => buyNFT(tokenId)}>Buy this Asset</button>
+                        : onMarket ? <button className="enableEthereumButton bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={() => removeFromMarket(tokenId)}>Remove this Asset from market</button>
                         : <button className="enableEthereumButton bg-red-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={() => sellNFT(tokenId)}>Sell this Asset</button>
                     }
                     

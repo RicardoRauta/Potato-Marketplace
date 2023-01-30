@@ -33,7 +33,7 @@ async function getKingData() {
 
     updateData(data);
     updateFetched(true);
-    updateCurrAddress(data.kingAddress);
+    updateCurrAddress(addr);
 }
 
 async function kingBattle()

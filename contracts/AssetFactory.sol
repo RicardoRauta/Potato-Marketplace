@@ -47,7 +47,7 @@ contract AssetFactory {
     }
 
     modifier notBoss() {
-        require(msg.sender == boss, "You are already the boss");
+        require(msg.sender != boss, "You are already the boss");
         _;
     }
 
@@ -104,6 +104,26 @@ contract AssetFactory {
 
     function bossBattle() public payable notBoss returns (bool)
     {
+        uint totalPower = getTotalPower();
+
+        if (totalPower > bossPower)
+        {
+            bossPower = totalPower;
+
+            uint balance = address(this).balance;
+            (bool success, ) = payable(msg.sender).call{value: balance/2}("");
+            require(success, "Failed to send Coin to new Boss");
+            (success, ) = payable(boss).call{value: balance/2}("");
+            require(success, "Failed to send Coin to previous Boss");
+
+            boss = msg.sender;
+            return true;
+        }
+        return false;
+    }
+
+    function getTotalPower() public view returns (uint)
+    {
         uint bestWeapon = 0;
         uint bestArmor = 0;
         uint bestAcessory = 0;
@@ -127,22 +147,7 @@ contract AssetFactory {
             }
         }
 
-        uint totalPower = bestWeapon + bestArmor + bestAcessory;
-
-        if (totalPower > bossPower)
-        {
-            bossPower = totalPower;
-
-            uint balance = address(this).balance;
-            (bool success, ) = payable(msg.sender).call{value: balance/2}("");
-            require(success, "Failed to send Coin to new Boss");
-            (success, ) = payable(boss).call{value: balance/2}("");
-            require(success, "Failed to send Coin to previous Boss");
-
-            boss = msg.sender;
-            return true;
-        }
-        return false;
+        return bestWeapon + bestArmor + bestAcessory;
     }
 
     function putAssetToSale(uint assetId, uint value) public onlyAssetOwner(assetId) assetNotForSale(assetId){

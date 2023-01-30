@@ -22,6 +22,7 @@ export default function Profile () {
     const [dataFetched, updateFetched] = useState(false);
     const [address, updateAddress] = useState("0x");
     const [totalPrice, updateTotalPrice] = useState("0");
+    const [totalPower, updateTotalPower] = useState("0");
 
     async function getNFTData(tokenId) {
         const ethers = require("ethers");
@@ -36,6 +37,7 @@ export default function Profile () {
 
         //create an NFT Token
         let transaction = await contract.getAllMyAssets()
+        let totalPower = await contract.getTotalPower();
 
         /*
         * Below function takes the metadata from tokenURI and the data returned by getMyNFTs() contract function
@@ -69,6 +71,7 @@ export default function Profile () {
         updateFetched(true);
         updateAddress(addr);
         updateTotalPrice(sumPrice.toPrecision(3));
+        updateTotalPower(parseInt(totalPower));
     }
 
     const params = useParams();
@@ -94,6 +97,10 @@ export default function Profile () {
                     <div className="ml-20">
                         <h2 className="font-bold">Total Value</h2>
                         {totalPrice} ETH
+                    </div>
+                    <div className="ml-20">
+                        <h2 className="font-bold">Account Power</h2>
+                        {totalPower}
                     </div>
             </div>
             <div className="flex flex-col text-center items-center mt-11 text-white">

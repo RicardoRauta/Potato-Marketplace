@@ -40,8 +40,8 @@ async function kingBattle()
 {
     const ethers = require("ethers");
 
-    const confirm = confirm("If you become the king you will gain half of the balance and the former king will gain the other half, resetting it. Would you like to battle for the throne?");
-    if (!confirm) return;
+    let confirmValue = window.confirm("If you become the king you will gain half of the balance and the former king will gain the other half, resetting it. Would you like to battle for the throne?");
+    if (!confirmValue) return;
 
     //After adding your Hardhat network to your metamask, this code will get providers and signers
     const provider = new ethers.providers.Web3Provider(window.ethereum);
@@ -84,7 +84,7 @@ return (
                 <div>
                     { currAddress != data.kingAddress ?
                         <button className="enableEthereumButton bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm" onClick={() => kingBattle()}>Battle for the throne</button>
-                        : <button className="enableEthereumButton bg-red-500 text-white font-bold py-2 px-4 rounded text-sm" >You are the King</button>
+                        : <button className="enableEthereumButton bg-red-500 text-white font-bold py-2 px-4 rounded text-sm" onClick={() => kingBattle()}>You are the King</button>
                     }   
                 </div>
             </div>

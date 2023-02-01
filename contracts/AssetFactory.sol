@@ -60,15 +60,15 @@ contract AssetFactory {
     Asset[] public assetsOnMarket;
 
     address public boss = creator;
-    uint public bossPower = 250;
+    uint public bossPower = 200;
 
     function kingBalance() public view returns (uint){
-        return address(this).balance;
+        return 3 * address(this).balance / 4;
     } 
 
     // Define a function to create a new NFT contract
     function createAsset() public payable checkValue {
-        uint nameId = uint(keccak256(abi.encodePacked(msg.sender, gasleft(), block.timestamp))) % 3;
+        uint nameId = uint(keccak256(abi.encodePacked(msg.sender, gasleft(), block.timestamp, nextAssetId))) % 3;
         string memory _name;
         if (nameId == 0) 
             _name = "Weapon";
@@ -108,10 +108,9 @@ contract AssetFactory {
         {
             bossPower = totalPower;
 
-            uint balance = address(this).balance;
-            (bool success, ) = payable(msg.sender).call{value: balance/2}("");
+            (bool success, ) = payable(msg.sender).call{value: 3 * address(this).balance / 4}("");
             require(success, "Failed to send Coin to new Boss");
-            (success, ) = payable(boss).call{value: balance/2}("");
+            (success, ) = payable(boss).call{value: address(this).balance}("");
             require(success, "Failed to send Coin to previous Boss");
 
             boss = msg.sender;

@@ -37,7 +37,7 @@ contract AssetFactory {
     }
 
     modifier checkAssetValue(uint256 marketAssetId) {
-        require(msg.value >= assetsOnMarket[marketAssetId].value(), "Value below the asset value");
+        require(msg.value >= idToAsset[marketAssetId].value(), "Value below the asset value");
         _;
     }
 

@@ -11,39 +11,8 @@ async function main() {
   //await marketplace.deployed();
 
   const data = {
-    address: 0x63d53E76bbee60a19D535d6276E20d867C768DCA,
+    address: 0x1BC8E97BCcb215C527C1424dc72d0b6be5Ad342f,
     abi:[
-      {
-        "anonymous": false,
-        "inputs": [
-          {
-            "indexed": true,
-            "internalType": "address",
-            "name": "creator",
-            "type": "address"
-          },
-          {
-            "indexed": true,
-            "internalType": "uint256",
-            "name": "assetId",
-            "type": "uint256"
-          },
-          {
-            "indexed": false,
-            "internalType": "string",
-            "name": "name",
-            "type": "string"
-          },
-          {
-            "indexed": false,
-            "internalType": "uint256",
-            "name": "power",
-            "type": "uint256"
-          }
-        ],
-        "name": "NewAsset",
-        "type": "event"
-      },
       {
         "inputs": [],
         "name": "bossBattle",
@@ -76,6 +45,37 @@ async function main() {
         "outputs": [],
         "stateMutability": "payable",
         "type": "function"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "creator",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "uint256",
+            "name": "assetId",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "name",
+            "type": "string"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "power",
+            "type": "uint256"
+          }
+        ],
+        "name": "NewAsset",
+        "type": "event"
       },
       {
         "inputs": [],
